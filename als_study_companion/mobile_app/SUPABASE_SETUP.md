@@ -198,6 +198,62 @@ flutter test integration_test/
 - Ensure `.env` is in `mobile_app/` directory
 - Verify anon key from Supabase Dashboard > Settings > API
 
+---
+
+## Comprehensive Schema Migration (v2)
+
+A comprehensive migration has been created at `supabase/migrations/20260309_comprehensive_schema.sql`. This migration adds all tables and RLS policies needed for the full system.
+
+### What It Adds
+
+| Table | Purpose |
+|-------|---------|
+| `users` columns | `email_verified`, `teacher_verified` |
+| `audit_logs` | Admin action audit trail |
+| `lessons` | Teacher-created lesson content |
+| `quizzes` | Quizzes attached to lessons |
+| `questions` | Quiz questions (multiple choice) |
+| `progress` | Student progress per lesson |
+| `sessions` | Scheduled class sessions |
+| `announcements` | Teacher/admin announcements |
+| `downloads` | Student offline download tracking |
+
+### How to Apply
+
+1. Open the Supabase SQL Editor in your project dashboard.
+2. Paste the contents of `supabase/migrations/20260309_comprehensive_schema.sql`.
+3. Execute the migration.
+
+Or via CLI:
+```bash
+supabase db push
+```
+
+### Storage Buckets
+
+The migration creates three storage buckets with RLS:
+- `lesson-videos` — Teacher video uploads (auth insert, public read)
+- `lesson-materials` — Study guides, PDFs (auth insert, public read)
+- `profile-pictures` — User profile photos (users manage own)
+
+### Server-Side Validation Triggers
+
+Triggers are installed on:
+- `users` — Validates email format, fullName length, role values
+- `lessons` — Validates title and subject are non-empty
+- `progress` — Validates percent (0–100) and score (0–100)
+
+### Email Verification & Teacher Approval
+
+After registration:
+- Students must verify email before accessing the app.
+- Teachers must verify email AND wait for admin approval (`teacher_verified = true`).
+- Admin can approve teachers via the Admin Web dashboard or directly in Supabase.
+
+### Local Database (SQLite)
+
+The local database schema has been bumped to **version 3**. On app launch, the migration automatically adds `emailVerified` and `teacherVerified` columns to the local `Users` table.
+
 ### Error: "relation 'users' does not exist"
 - Run the SQL schema creation script in Supabase SQL Editor
 - Check table name matches exactly (case-sensitive)

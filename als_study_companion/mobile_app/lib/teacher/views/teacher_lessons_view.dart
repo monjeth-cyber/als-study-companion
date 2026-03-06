@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'teacher_lesson_create_view.dart';
 
 /// View for teachers to manage their lessons.
 class TeacherLessonsView extends StatelessWidget {
@@ -10,7 +11,9 @@ class TeacherLessonsView extends StatelessWidget {
       appBar: AppBar(title: const Text('My Lessons')),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Navigate to lesson creation form
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const TeacherLessonCreateView()),
+          );
         },
         child: const Icon(Icons.add),
       ),

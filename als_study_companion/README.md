@@ -1,39 +1,77 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# ALS Study Companion
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+A Flutter-based learning management system for the Alternative Learning System (ALS) in the Philippines. Supports students, teachers, and administrators with offline-first architecture.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+## Architecture
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+- **mobile_app/** — Student & Teacher mobile app (Flutter + Provider MVVM)
+- **admin_web/** — Administrator web dashboard (Flutter Web)
+- **backend_services/** — Shared backend logic (Supabase client, sync service)
+- **shared_core/** — Models, enums, validators, constants shared across all packages
 
-## Features
+## Key Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+### Students
+- Google Sign-In + email/password authentication
+- Email verification gate before access
+- Lesson browsing and video playback
+- Quiz taking with progress tracking
+- Offline downloads with progress indicators
+- Progress export to CSV
 
-## Getting started
+### Teachers
+- Registration with admin approval workflow
+- Lesson creation with video & material uploads (progress tracking)
+- Class session management
+- Announcements
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+### Administrators (Web)
+- User management (search, role changes, bulk CSV import)
+- Content moderation (publish/unpublish lessons, delete)
+- Teacher approval/revocation
+- Analytics dashboard with real Supabase data
+- Audit logging for all admin actions
 
-## Usage
+## Tech Stack
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+| Layer | Technology |
+|-------|-----------|
+| Mobile UI | Flutter 3.x, Provider |
+| Web UI | Flutter Web |
+| Auth | Firebase Auth + Supabase Auth |
+| Cloud DB | Supabase (PostgreSQL + RLS) |
+| Local DB | Drift (SQLite) + sqflite |
+| Storage | Supabase Storage |
+| Sync | Offline-first with exponential backoff |
 
-```dart
-const like = 'sample';
+## Getting Started
+
+```bash
+# Install dependencies for all packages
+cd shared_core && flutter pub get && cd ..
+cd backend_services && flutter pub get && cd ..
+cd mobile_app && flutter pub get && cd ..
+cd admin_web && flutter pub get && cd ..
+
+# Generate Drift database code
+cd mobile_app && dart run build_runner build --delete-conflicting-outputs
+
+# Run mobile app
+cd mobile_app && flutter run
+
+# Run admin web
+cd admin_web && flutter run -d chrome
 ```
 
-## Additional information
+## Supabase Setup
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+See [mobile_app/SUPABASE_SETUP.md](mobile_app/SUPABASE_SETUP.md) for full setup instructions including the comprehensive schema migration.
+
+## Running Tests
+
+```bash
+cd shared_core && flutter test
+cd backend_services && flutter test
+cd mobile_app && flutter test
+cd admin_web && flutter test
+```

@@ -106,6 +106,133 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _firstNameMeta = const VerificationMeta(
+    'firstName',
+  );
+  @override
+  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
+    'first_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastNameMeta = const VerificationMeta(
+    'lastName',
+  );
+  @override
+  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
+    'last_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _studentIdNumberMeta = const VerificationMeta(
+    'studentIdNumber',
+  );
+  @override
+  late final GeneratedColumn<String> studentIdNumber = GeneratedColumn<String>(
+    'student_id_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dateOfBirthMeta = const VerificationMeta(
+    'dateOfBirth',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dateOfBirth = GeneratedColumn<DateTime>(
+    'date_of_birth',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ageMeta = const VerificationMeta('age');
+  @override
+  late final GeneratedColumn<int> age = GeneratedColumn<int>(
+    'age',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _phoneNumberMeta = const VerificationMeta(
+    'phoneNumber',
+  );
+  @override
+  late final GeneratedColumn<String> phoneNumber = GeneratedColumn<String>(
+    'phone_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _occupationMeta = const VerificationMeta(
+    'occupation',
+  );
+  @override
+  late final GeneratedColumn<String> occupation = GeneratedColumn<String>(
+    'occupation',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSchoolAttendedMeta =
+      const VerificationMeta('lastSchoolAttended');
+  @override
+  late final GeneratedColumn<String> lastSchoolAttended =
+      GeneratedColumn<String>(
+        'last_school_attended',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastYearAttendedMeta = const VerificationMeta(
+    'lastYearAttended',
+  );
+  @override
+  late final GeneratedColumn<String> lastYearAttended = GeneratedColumn<String>(
+    'last_year_attended',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _emailVerifiedMeta = const VerificationMeta(
+    'emailVerified',
+  );
+  @override
+  late final GeneratedColumn<bool> emailVerified = GeneratedColumn<bool>(
+    'email_verified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("email_verified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _teacherVerifiedMeta = const VerificationMeta(
+    'teacherVerified',
+  );
+  @override
+  late final GeneratedColumn<bool> teacherVerified = GeneratedColumn<bool>(
+    'teacher_verified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("teacher_verified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -117,6 +244,17 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     isActive,
     createdAt,
     updatedAt,
+    firstName,
+    lastName,
+    studentIdNumber,
+    dateOfBirth,
+    age,
+    phoneNumber,
+    occupation,
+    lastSchoolAttended,
+    lastYearAttended,
+    emailVerified,
+    teacherVerified,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -199,6 +337,93 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('first_name')) {
+      context.handle(
+        _firstNameMeta,
+        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
+      );
+    }
+    if (data.containsKey('last_name')) {
+      context.handle(
+        _lastNameMeta,
+        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
+      );
+    }
+    if (data.containsKey('student_id_number')) {
+      context.handle(
+        _studentIdNumberMeta,
+        studentIdNumber.isAcceptableOrUnknown(
+          data['student_id_number']!,
+          _studentIdNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('date_of_birth')) {
+      context.handle(
+        _dateOfBirthMeta,
+        dateOfBirth.isAcceptableOrUnknown(
+          data['date_of_birth']!,
+          _dateOfBirthMeta,
+        ),
+      );
+    }
+    if (data.containsKey('age')) {
+      context.handle(
+        _ageMeta,
+        age.isAcceptableOrUnknown(data['age']!, _ageMeta),
+      );
+    }
+    if (data.containsKey('phone_number')) {
+      context.handle(
+        _phoneNumberMeta,
+        phoneNumber.isAcceptableOrUnknown(
+          data['phone_number']!,
+          _phoneNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('occupation')) {
+      context.handle(
+        _occupationMeta,
+        occupation.isAcceptableOrUnknown(data['occupation']!, _occupationMeta),
+      );
+    }
+    if (data.containsKey('last_school_attended')) {
+      context.handle(
+        _lastSchoolAttendedMeta,
+        lastSchoolAttended.isAcceptableOrUnknown(
+          data['last_school_attended']!,
+          _lastSchoolAttendedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_year_attended')) {
+      context.handle(
+        _lastYearAttendedMeta,
+        lastYearAttended.isAcceptableOrUnknown(
+          data['last_year_attended']!,
+          _lastYearAttendedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('email_verified')) {
+      context.handle(
+        _emailVerifiedMeta,
+        emailVerified.isAcceptableOrUnknown(
+          data['email_verified']!,
+          _emailVerifiedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('teacher_verified')) {
+      context.handle(
+        _teacherVerifiedMeta,
+        teacherVerified.isAcceptableOrUnknown(
+          data['teacher_verified']!,
+          _teacherVerifiedMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -244,6 +469,50 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      firstName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_name'],
+      ),
+      lastName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_name'],
+      ),
+      studentIdNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}student_id_number'],
+      ),
+      dateOfBirth: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date_of_birth'],
+      ),
+      age: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}age'],
+      ),
+      phoneNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone_number'],
+      ),
+      occupation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occupation'],
+      ),
+      lastSchoolAttended: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_school_attended'],
+      ),
+      lastYearAttended: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_year_attended'],
+      ),
+      emailVerified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}email_verified'],
+      )!,
+      teacherVerified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}teacher_verified'],
+      )!,
     );
   }
 
@@ -263,6 +532,17 @@ class User extends DataClass implements Insertable<User> {
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? firstName;
+  final String? lastName;
+  final String? studentIdNumber;
+  final DateTime? dateOfBirth;
+  final int? age;
+  final String? phoneNumber;
+  final String? occupation;
+  final String? lastSchoolAttended;
+  final String? lastYearAttended;
+  final bool emailVerified;
+  final bool teacherVerified;
   const User({
     required this.id,
     required this.email,
@@ -273,6 +553,17 @@ class User extends DataClass implements Insertable<User> {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.firstName,
+    this.lastName,
+    this.studentIdNumber,
+    this.dateOfBirth,
+    this.age,
+    this.phoneNumber,
+    this.occupation,
+    this.lastSchoolAttended,
+    this.lastYearAttended,
+    required this.emailVerified,
+    required this.teacherVerified,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -290,6 +581,35 @@ class User extends DataClass implements Insertable<User> {
     map['is_active'] = Variable<bool>(isActive);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || firstName != null) {
+      map['first_name'] = Variable<String>(firstName);
+    }
+    if (!nullToAbsent || lastName != null) {
+      map['last_name'] = Variable<String>(lastName);
+    }
+    if (!nullToAbsent || studentIdNumber != null) {
+      map['student_id_number'] = Variable<String>(studentIdNumber);
+    }
+    if (!nullToAbsent || dateOfBirth != null) {
+      map['date_of_birth'] = Variable<DateTime>(dateOfBirth);
+    }
+    if (!nullToAbsent || age != null) {
+      map['age'] = Variable<int>(age);
+    }
+    if (!nullToAbsent || phoneNumber != null) {
+      map['phone_number'] = Variable<String>(phoneNumber);
+    }
+    if (!nullToAbsent || occupation != null) {
+      map['occupation'] = Variable<String>(occupation);
+    }
+    if (!nullToAbsent || lastSchoolAttended != null) {
+      map['last_school_attended'] = Variable<String>(lastSchoolAttended);
+    }
+    if (!nullToAbsent || lastYearAttended != null) {
+      map['last_year_attended'] = Variable<String>(lastYearAttended);
+    }
+    map['email_verified'] = Variable<bool>(emailVerified);
+    map['teacher_verified'] = Variable<bool>(teacherVerified);
     return map;
   }
 
@@ -308,6 +628,33 @@ class User extends DataClass implements Insertable<User> {
       isActive: Value(isActive),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      firstName: firstName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firstName),
+      lastName: lastName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastName),
+      studentIdNumber: studentIdNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(studentIdNumber),
+      dateOfBirth: dateOfBirth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dateOfBirth),
+      age: age == null && nullToAbsent ? const Value.absent() : Value(age),
+      phoneNumber: phoneNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(phoneNumber),
+      occupation: occupation == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occupation),
+      lastSchoolAttended: lastSchoolAttended == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSchoolAttended),
+      lastYearAttended: lastYearAttended == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastYearAttended),
+      emailVerified: Value(emailVerified),
+      teacherVerified: Value(teacherVerified),
     );
   }
 
@@ -328,6 +675,19 @@ class User extends DataClass implements Insertable<User> {
       isActive: serializer.fromJson<bool>(json['isActive']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      firstName: serializer.fromJson<String?>(json['firstName']),
+      lastName: serializer.fromJson<String?>(json['lastName']),
+      studentIdNumber: serializer.fromJson<String?>(json['studentIdNumber']),
+      dateOfBirth: serializer.fromJson<DateTime?>(json['dateOfBirth']),
+      age: serializer.fromJson<int?>(json['age']),
+      phoneNumber: serializer.fromJson<String?>(json['phoneNumber']),
+      occupation: serializer.fromJson<String?>(json['occupation']),
+      lastSchoolAttended: serializer.fromJson<String?>(
+        json['lastSchoolAttended'],
+      ),
+      lastYearAttended: serializer.fromJson<String?>(json['lastYearAttended']),
+      emailVerified: serializer.fromJson<bool>(json['emailVerified']),
+      teacherVerified: serializer.fromJson<bool>(json['teacherVerified']),
     );
   }
   @override
@@ -343,6 +703,17 @@ class User extends DataClass implements Insertable<User> {
       'isActive': serializer.toJson<bool>(isActive),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'firstName': serializer.toJson<String?>(firstName),
+      'lastName': serializer.toJson<String?>(lastName),
+      'studentIdNumber': serializer.toJson<String?>(studentIdNumber),
+      'dateOfBirth': serializer.toJson<DateTime?>(dateOfBirth),
+      'age': serializer.toJson<int?>(age),
+      'phoneNumber': serializer.toJson<String?>(phoneNumber),
+      'occupation': serializer.toJson<String?>(occupation),
+      'lastSchoolAttended': serializer.toJson<String?>(lastSchoolAttended),
+      'lastYearAttended': serializer.toJson<String?>(lastYearAttended),
+      'emailVerified': serializer.toJson<bool>(emailVerified),
+      'teacherVerified': serializer.toJson<bool>(teacherVerified),
     };
   }
 
@@ -356,6 +727,17 @@ class User extends DataClass implements Insertable<User> {
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<String?> firstName = const Value.absent(),
+    Value<String?> lastName = const Value.absent(),
+    Value<String?> studentIdNumber = const Value.absent(),
+    Value<DateTime?> dateOfBirth = const Value.absent(),
+    Value<int?> age = const Value.absent(),
+    Value<String?> phoneNumber = const Value.absent(),
+    Value<String?> occupation = const Value.absent(),
+    Value<String?> lastSchoolAttended = const Value.absent(),
+    Value<String?> lastYearAttended = const Value.absent(),
+    bool? emailVerified,
+    bool? teacherVerified,
   }) => User(
     id: id ?? this.id,
     email: email ?? this.email,
@@ -368,6 +750,23 @@ class User extends DataClass implements Insertable<User> {
     isActive: isActive ?? this.isActive,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    firstName: firstName.present ? firstName.value : this.firstName,
+    lastName: lastName.present ? lastName.value : this.lastName,
+    studentIdNumber: studentIdNumber.present
+        ? studentIdNumber.value
+        : this.studentIdNumber,
+    dateOfBirth: dateOfBirth.present ? dateOfBirth.value : this.dateOfBirth,
+    age: age.present ? age.value : this.age,
+    phoneNumber: phoneNumber.present ? phoneNumber.value : this.phoneNumber,
+    occupation: occupation.present ? occupation.value : this.occupation,
+    lastSchoolAttended: lastSchoolAttended.present
+        ? lastSchoolAttended.value
+        : this.lastSchoolAttended,
+    lastYearAttended: lastYearAttended.present
+        ? lastYearAttended.value
+        : this.lastYearAttended,
+    emailVerified: emailVerified ?? this.emailVerified,
+    teacherVerified: teacherVerified ?? this.teacherVerified,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -384,6 +783,33 @@ class User extends DataClass implements Insertable<User> {
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      firstName: data.firstName.present ? data.firstName.value : this.firstName,
+      lastName: data.lastName.present ? data.lastName.value : this.lastName,
+      studentIdNumber: data.studentIdNumber.present
+          ? data.studentIdNumber.value
+          : this.studentIdNumber,
+      dateOfBirth: data.dateOfBirth.present
+          ? data.dateOfBirth.value
+          : this.dateOfBirth,
+      age: data.age.present ? data.age.value : this.age,
+      phoneNumber: data.phoneNumber.present
+          ? data.phoneNumber.value
+          : this.phoneNumber,
+      occupation: data.occupation.present
+          ? data.occupation.value
+          : this.occupation,
+      lastSchoolAttended: data.lastSchoolAttended.present
+          ? data.lastSchoolAttended.value
+          : this.lastSchoolAttended,
+      lastYearAttended: data.lastYearAttended.present
+          ? data.lastYearAttended.value
+          : this.lastYearAttended,
+      emailVerified: data.emailVerified.present
+          ? data.emailVerified.value
+          : this.emailVerified,
+      teacherVerified: data.teacherVerified.present
+          ? data.teacherVerified.value
+          : this.teacherVerified,
     );
   }
 
@@ -398,7 +824,18 @@ class User extends DataClass implements Insertable<User> {
           ..write('alsCenterId: $alsCenterId, ')
           ..write('isActive: $isActive, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('studentIdNumber: $studentIdNumber, ')
+          ..write('dateOfBirth: $dateOfBirth, ')
+          ..write('age: $age, ')
+          ..write('phoneNumber: $phoneNumber, ')
+          ..write('occupation: $occupation, ')
+          ..write('lastSchoolAttended: $lastSchoolAttended, ')
+          ..write('lastYearAttended: $lastYearAttended, ')
+          ..write('emailVerified: $emailVerified, ')
+          ..write('teacherVerified: $teacherVerified')
           ..write(')'))
         .toString();
   }
@@ -414,6 +851,17 @@ class User extends DataClass implements Insertable<User> {
     isActive,
     createdAt,
     updatedAt,
+    firstName,
+    lastName,
+    studentIdNumber,
+    dateOfBirth,
+    age,
+    phoneNumber,
+    occupation,
+    lastSchoolAttended,
+    lastYearAttended,
+    emailVerified,
+    teacherVerified,
   );
   @override
   bool operator ==(Object other) =>
@@ -427,7 +875,18 @@ class User extends DataClass implements Insertable<User> {
           other.alsCenterId == this.alsCenterId &&
           other.isActive == this.isActive &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.firstName == this.firstName &&
+          other.lastName == this.lastName &&
+          other.studentIdNumber == this.studentIdNumber &&
+          other.dateOfBirth == this.dateOfBirth &&
+          other.age == this.age &&
+          other.phoneNumber == this.phoneNumber &&
+          other.occupation == this.occupation &&
+          other.lastSchoolAttended == this.lastSchoolAttended &&
+          other.lastYearAttended == this.lastYearAttended &&
+          other.emailVerified == this.emailVerified &&
+          other.teacherVerified == this.teacherVerified);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -440,6 +899,17 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<bool> isActive;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<String?> firstName;
+  final Value<String?> lastName;
+  final Value<String?> studentIdNumber;
+  final Value<DateTime?> dateOfBirth;
+  final Value<int?> age;
+  final Value<String?> phoneNumber;
+  final Value<String?> occupation;
+  final Value<String?> lastSchoolAttended;
+  final Value<String?> lastYearAttended;
+  final Value<bool> emailVerified;
+  final Value<bool> teacherVerified;
   final Value<int> rowid;
   const UsersCompanion({
     this.id = const Value.absent(),
@@ -451,6 +921,17 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.isActive = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.firstName = const Value.absent(),
+    this.lastName = const Value.absent(),
+    this.studentIdNumber = const Value.absent(),
+    this.dateOfBirth = const Value.absent(),
+    this.age = const Value.absent(),
+    this.phoneNumber = const Value.absent(),
+    this.occupation = const Value.absent(),
+    this.lastSchoolAttended = const Value.absent(),
+    this.lastYearAttended = const Value.absent(),
+    this.emailVerified = const Value.absent(),
+    this.teacherVerified = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -463,6 +944,17 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.isActive = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.firstName = const Value.absent(),
+    this.lastName = const Value.absent(),
+    this.studentIdNumber = const Value.absent(),
+    this.dateOfBirth = const Value.absent(),
+    this.age = const Value.absent(),
+    this.phoneNumber = const Value.absent(),
+    this.occupation = const Value.absent(),
+    this.lastSchoolAttended = const Value.absent(),
+    this.lastYearAttended = const Value.absent(),
+    this.emailVerified = const Value.absent(),
+    this.teacherVerified = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        email = Value(email),
@@ -480,6 +972,17 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<bool>? isActive,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? firstName,
+    Expression<String>? lastName,
+    Expression<String>? studentIdNumber,
+    Expression<DateTime>? dateOfBirth,
+    Expression<int>? age,
+    Expression<String>? phoneNumber,
+    Expression<String>? occupation,
+    Expression<String>? lastSchoolAttended,
+    Expression<String>? lastYearAttended,
+    Expression<bool>? emailVerified,
+    Expression<bool>? teacherVerified,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -492,6 +995,18 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (isActive != null) 'is_active': isActive,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (firstName != null) 'first_name': firstName,
+      if (lastName != null) 'last_name': lastName,
+      if (studentIdNumber != null) 'student_id_number': studentIdNumber,
+      if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
+      if (age != null) 'age': age,
+      if (phoneNumber != null) 'phone_number': phoneNumber,
+      if (occupation != null) 'occupation': occupation,
+      if (lastSchoolAttended != null)
+        'last_school_attended': lastSchoolAttended,
+      if (lastYearAttended != null) 'last_year_attended': lastYearAttended,
+      if (emailVerified != null) 'email_verified': emailVerified,
+      if (teacherVerified != null) 'teacher_verified': teacherVerified,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -506,6 +1021,17 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<bool>? isActive,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<String?>? firstName,
+    Value<String?>? lastName,
+    Value<String?>? studentIdNumber,
+    Value<DateTime?>? dateOfBirth,
+    Value<int?>? age,
+    Value<String?>? phoneNumber,
+    Value<String?>? occupation,
+    Value<String?>? lastSchoolAttended,
+    Value<String?>? lastYearAttended,
+    Value<bool>? emailVerified,
+    Value<bool>? teacherVerified,
     Value<int>? rowid,
   }) {
     return UsersCompanion(
@@ -518,6 +1044,17 @@ class UsersCompanion extends UpdateCompanion<User> {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      studentIdNumber: studentIdNumber ?? this.studentIdNumber,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      age: age ?? this.age,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      occupation: occupation ?? this.occupation,
+      lastSchoolAttended: lastSchoolAttended ?? this.lastSchoolAttended,
+      lastYearAttended: lastYearAttended ?? this.lastYearAttended,
+      emailVerified: emailVerified ?? this.emailVerified,
+      teacherVerified: teacherVerified ?? this.teacherVerified,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -552,6 +1089,39 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (firstName.present) {
+      map['first_name'] = Variable<String>(firstName.value);
+    }
+    if (lastName.present) {
+      map['last_name'] = Variable<String>(lastName.value);
+    }
+    if (studentIdNumber.present) {
+      map['student_id_number'] = Variable<String>(studentIdNumber.value);
+    }
+    if (dateOfBirth.present) {
+      map['date_of_birth'] = Variable<DateTime>(dateOfBirth.value);
+    }
+    if (age.present) {
+      map['age'] = Variable<int>(age.value);
+    }
+    if (phoneNumber.present) {
+      map['phone_number'] = Variable<String>(phoneNumber.value);
+    }
+    if (occupation.present) {
+      map['occupation'] = Variable<String>(occupation.value);
+    }
+    if (lastSchoolAttended.present) {
+      map['last_school_attended'] = Variable<String>(lastSchoolAttended.value);
+    }
+    if (lastYearAttended.present) {
+      map['last_year_attended'] = Variable<String>(lastYearAttended.value);
+    }
+    if (emailVerified.present) {
+      map['email_verified'] = Variable<bool>(emailVerified.value);
+    }
+    if (teacherVerified.present) {
+      map['teacher_verified'] = Variable<bool>(teacherVerified.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -570,6 +1140,17 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('isActive: $isActive, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('studentIdNumber: $studentIdNumber, ')
+          ..write('dateOfBirth: $dateOfBirth, ')
+          ..write('age: $age, ')
+          ..write('phoneNumber: $phoneNumber, ')
+          ..write('occupation: $occupation, ')
+          ..write('lastSchoolAttended: $lastSchoolAttended, ')
+          ..write('lastYearAttended: $lastYearAttended, ')
+          ..write('emailVerified: $emailVerified, ')
+          ..write('teacherVerified: $teacherVerified, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1158,6 +1739,17 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<bool> isActive,
       required DateTime createdAt,
       required DateTime updatedAt,
+      Value<String?> firstName,
+      Value<String?> lastName,
+      Value<String?> studentIdNumber,
+      Value<DateTime?> dateOfBirth,
+      Value<int?> age,
+      Value<String?> phoneNumber,
+      Value<String?> occupation,
+      Value<String?> lastSchoolAttended,
+      Value<String?> lastYearAttended,
+      Value<bool> emailVerified,
+      Value<bool> teacherVerified,
       Value<int> rowid,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
@@ -1171,6 +1763,17 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<bool> isActive,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<String?> firstName,
+      Value<String?> lastName,
+      Value<String?> studentIdNumber,
+      Value<DateTime?> dateOfBirth,
+      Value<int?> age,
+      Value<String?> phoneNumber,
+      Value<String?> occupation,
+      Value<String?> lastSchoolAttended,
+      Value<String?> lastYearAttended,
+      Value<bool> emailVerified,
+      Value<bool> teacherVerified,
       Value<int> rowid,
     });
 
@@ -1225,6 +1828,61 @@ class $$UsersTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get studentIdNumber => $composableBuilder(
+    column: $table.studentIdNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get age => $composableBuilder(
+    column: $table.age,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phoneNumber => $composableBuilder(
+    column: $table.phoneNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get occupation => $composableBuilder(
+    column: $table.occupation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSchoolAttended => $composableBuilder(
+    column: $table.lastSchoolAttended,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastYearAttended => $composableBuilder(
+    column: $table.lastYearAttended,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get emailVerified => $composableBuilder(
+    column: $table.emailVerified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get teacherVerified => $composableBuilder(
+    column: $table.teacherVerified,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1282,6 +1940,61 @@ class $$UsersTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get studentIdNumber => $composableBuilder(
+    column: $table.studentIdNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get age => $composableBuilder(
+    column: $table.age,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phoneNumber => $composableBuilder(
+    column: $table.phoneNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get occupation => $composableBuilder(
+    column: $table.occupation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSchoolAttended => $composableBuilder(
+    column: $table.lastSchoolAttended,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastYearAttended => $composableBuilder(
+    column: $table.lastYearAttended,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get emailVerified => $composableBuilder(
+    column: $table.emailVerified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get teacherVerified => $composableBuilder(
+    column: $table.teacherVerified,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -1323,6 +2036,55 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get firstName =>
+      $composableBuilder(column: $table.firstName, builder: (column) => column);
+
+  GeneratedColumn<String> get lastName =>
+      $composableBuilder(column: $table.lastName, builder: (column) => column);
+
+  GeneratedColumn<String> get studentIdNumber => $composableBuilder(
+    column: $table.studentIdNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get age =>
+      $composableBuilder(column: $table.age, builder: (column) => column);
+
+  GeneratedColumn<String> get phoneNumber => $composableBuilder(
+    column: $table.phoneNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get occupation => $composableBuilder(
+    column: $table.occupation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastSchoolAttended => $composableBuilder(
+    column: $table.lastSchoolAttended,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastYearAttended => $composableBuilder(
+    column: $table.lastYearAttended,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get emailVerified => $composableBuilder(
+    column: $table.emailVerified,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get teacherVerified => $composableBuilder(
+    column: $table.teacherVerified,
+    builder: (column) => column,
+  );
 }
 
 class $$UsersTableTableManager
@@ -1362,6 +2124,17 @@ class $$UsersTableTableManager
                 Value<bool> isActive = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> firstName = const Value.absent(),
+                Value<String?> lastName = const Value.absent(),
+                Value<String?> studentIdNumber = const Value.absent(),
+                Value<DateTime?> dateOfBirth = const Value.absent(),
+                Value<int?> age = const Value.absent(),
+                Value<String?> phoneNumber = const Value.absent(),
+                Value<String?> occupation = const Value.absent(),
+                Value<String?> lastSchoolAttended = const Value.absent(),
+                Value<String?> lastYearAttended = const Value.absent(),
+                Value<bool> emailVerified = const Value.absent(),
+                Value<bool> teacherVerified = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
@@ -1373,6 +2146,17 @@ class $$UsersTableTableManager
                 isActive: isActive,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                firstName: firstName,
+                lastName: lastName,
+                studentIdNumber: studentIdNumber,
+                dateOfBirth: dateOfBirth,
+                age: age,
+                phoneNumber: phoneNumber,
+                occupation: occupation,
+                lastSchoolAttended: lastSchoolAttended,
+                lastYearAttended: lastYearAttended,
+                emailVerified: emailVerified,
+                teacherVerified: teacherVerified,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1386,6 +2170,17 @@ class $$UsersTableTableManager
                 Value<bool> isActive = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
+                Value<String?> firstName = const Value.absent(),
+                Value<String?> lastName = const Value.absent(),
+                Value<String?> studentIdNumber = const Value.absent(),
+                Value<DateTime?> dateOfBirth = const Value.absent(),
+                Value<int?> age = const Value.absent(),
+                Value<String?> phoneNumber = const Value.absent(),
+                Value<String?> occupation = const Value.absent(),
+                Value<String?> lastSchoolAttended = const Value.absent(),
+                Value<String?> lastYearAttended = const Value.absent(),
+                Value<bool> emailVerified = const Value.absent(),
+                Value<bool> teacherVerified = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
@@ -1397,6 +2192,17 @@ class $$UsersTableTableManager
                 isActive: isActive,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                firstName: firstName,
+                lastName: lastName,
+                studentIdNumber: studentIdNumber,
+                dateOfBirth: dateOfBirth,
+                age: age,
+                phoneNumber: phoneNumber,
+                occupation: occupation,
+                lastSchoolAttended: lastSchoolAttended,
+                lastYearAttended: lastYearAttended,
+                emailVerified: emailVerified,
+                teacherVerified: teacherVerified,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

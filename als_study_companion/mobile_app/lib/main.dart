@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'core/services/connectivity_service.dart';
 import 'core/database/database_helper.dart';
@@ -34,6 +36,9 @@ void main() async {
       'Warning: .env file not found. Using default values for development.',
     );
   }
+
+  // Initialize Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize Supabase
   await Supabase.initialize(

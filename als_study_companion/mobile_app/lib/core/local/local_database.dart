@@ -18,6 +18,23 @@ class Users extends Table {
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
+  // Student-specific
+  TextColumn get firstName => text().nullable()();
+  TextColumn get lastName => text().nullable()();
+  TextColumn get studentIdNumber => text().nullable()();
+  DateTimeColumn get dateOfBirth => dateTime().nullable()();
+  IntColumn get age => integer().nullable()();
+  TextColumn get phoneNumber => text().nullable()();
+  TextColumn get occupation => text().nullable()();
+  TextColumn get lastSchoolAttended => text().nullable()();
+  TextColumn get lastYearAttended => text().nullable()();
+
+  // Verification flags
+  BoolColumn get emailVerified =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get teacherVerified =>
+      boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -40,7 +57,29 @@ class LocalDatabase extends _$LocalDatabase {
   LocalDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(users, users.firstName);
+        await m.addColumn(users, users.lastName);
+        await m.addColumn(users, users.studentIdNumber);
+        await m.addColumn(users, users.dateOfBirth);
+        await m.addColumn(users, users.age);
+        await m.addColumn(users, users.phoneNumber);
+        await m.addColumn(users, users.occupation);
+        await m.addColumn(users, users.lastSchoolAttended);
+        await m.addColumn(users, users.lastYearAttended);
+      }
+      if (from < 3) {
+        await m.addColumn(users, users.emailVerified);
+        await m.addColumn(users, users.teacherVerified);
+      }
+    },
+  );
 
   // User operations
   Future<User?> getUserById(String id) async {

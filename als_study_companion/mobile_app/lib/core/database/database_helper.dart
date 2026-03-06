@@ -38,7 +38,18 @@ class DatabaseHelper {
         alsCenterId TEXT,
         isActive INTEGER DEFAULT 1,
         createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
+        updatedAt TEXT NOT NULL,
+        firstName TEXT,
+        lastName TEXT,
+        studentIdNumber TEXT,
+        dateOfBirth TEXT,
+        age INTEGER,
+        phoneNumber TEXT,
+        occupation TEXT,
+        lastSchoolAttended TEXT,
+        lastYearAttended TEXT,
+        emailVerified INTEGER DEFAULT 0,
+        teacherVerified INTEGER DEFAULT 0
       )
     ''');
 
@@ -211,7 +222,32 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Handle future database migrations here
+    if (oldVersion < 2) {
+      final cols = [
+        'firstName TEXT',
+        'lastName TEXT',
+        'studentIdNumber TEXT',
+        'dateOfBirth TEXT',
+        'age INTEGER',
+        'phoneNumber TEXT',
+        'occupation TEXT',
+        'lastSchoolAttended TEXT',
+        'lastYearAttended TEXT',
+      ];
+      for (final col in cols) {
+        await db.execute(
+          'ALTER TABLE ${DbConstants.tableUsers} ADD COLUMN $col',
+        );
+      }
+    }
+    if (oldVersion < 3) {
+      await db.execute(
+        'ALTER TABLE ${DbConstants.tableUsers} ADD COLUMN emailVerified INTEGER DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE ${DbConstants.tableUsers} ADD COLUMN teacherVerified INTEGER DEFAULT 0',
+      );
+    }
   }
 
   // Generic CRUD operations

@@ -24,12 +24,25 @@ class AuthViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isAuthenticated = false;
+  bool _emailVerified = false;
 
   UserModel? get currentUser => _currentUser;
   UserRole? get currentRole => _currentRole;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _isAuthenticated;
+  bool get emailVerified => _emailVerified;
+
+  /// True when the user is logged in but their email is not verified.
+  bool get needsEmailVerification =>
+      _isAuthenticated && _currentUser != null && !_currentUser!.emailVerified;
+
+  /// True when a teacher is logged in but not yet approved by admin.
+  bool get needsTeacherApproval =>
+      _isAuthenticated &&
+      _currentUser != null &&
+      _currentUser!.role == UserRole.teacher &&
+      !_currentUser!.teacherVerified;
 
   /// Initialize auth state listener
   void _initAuthListener() {
@@ -82,6 +95,7 @@ class AuthViewModel extends ChangeNotifier {
         _currentUser = user;
         _currentRole = user.role;
         _isAuthenticated = true;
+        _emailVerified = user.emailVerified;
 
         // Cache user in local database for offline access
         await _cacheUserLocally(user);
@@ -171,6 +185,127 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Register a new student.
+  Future<bool> registerStudent({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String studentIdNumber,
+    required DateTime dateOfBirth,
+    required int age,
+    required String phoneNumber,
+    String? occupation,
+    String? lastSchoolAttended,
+    String? lastYearAttended,
+    String? alsCenterId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final user = await _authService.registerStudent(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        studentIdNumber: studentIdNumber,
+        dateOfBirth: dateOfBirth,
+        age: age,
+        phoneNumber: phoneNumber,
+        occupation: occupation,
+        lastSchoolAttended: lastSchoolAttended,
+        lastYearAttended: lastYearAttended,
+        alsCenterId: alsCenterId,
+      );
+
+      _currentUser = user;
+      _currentRole = UserRole.student;
+      _isAuthenticated = true;
+      _emailVerified = false;
+      await _cacheUserLocally(user);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = _formatErrorMessage(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Register a new teacher.
+  Future<bool> registerTeacher({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+    String? alsCenterId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final user = await _authService.registerTeacher(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        phoneNumber: phoneNumber,
+        alsCenterId: alsCenterId,
+      );
+
+      _currentUser = user;
+      _currentRole = UserRole.teacher;
+      _isAuthenticated = true;
+      _emailVerified = false;
+      await _cacheUserLocally(user);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = _formatErrorMessage(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Check if the current user's email is verified (Firebase).
+  /// If verified, also marks the flag in the Supabase users table.
+  Future<bool> checkEmailVerified() async {
+    final verified = await _authService.checkFirebaseEmailVerified();
+    _emailVerified = verified;
+    if (verified && _currentUser != null && !_currentUser!.emailVerified) {
+      await _authService.markEmailVerified(_currentUser!.id);
+      _currentUser = _currentUser!.copyWith(emailVerified: true);
+    }
+    notifyListeners();
+    return verified;
+  }
+
+  /// Resend email verification link (Firebase).
+  Future<void> sendEmailVerification() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _authService.sendFirebaseEmailVerification();
+    } catch (e) {
+      _errorMessage = 'Failed to send verification email: ${e.toString()}';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   /// Cache user in local database for offline access
   Future<void> _cacheUserLocally(UserModel user) async {
     try {
@@ -185,6 +320,17 @@ class AuthViewModel extends ChangeNotifier {
           isActive: drift.Value(user.isActive),
           createdAt: drift.Value(user.createdAt),
           updatedAt: drift.Value(user.updatedAt),
+          firstName: drift.Value(user.firstName),
+          lastName: drift.Value(user.lastName),
+          studentIdNumber: drift.Value(user.studentIdNumber),
+          dateOfBirth: drift.Value(user.dateOfBirth),
+          age: drift.Value(user.age),
+          phoneNumber: drift.Value(user.phoneNumber),
+          occupation: drift.Value(user.occupation),
+          lastSchoolAttended: drift.Value(user.lastSchoolAttended),
+          lastYearAttended: drift.Value(user.lastYearAttended),
+          emailVerified: drift.Value(user.emailVerified),
+          teacherVerified: drift.Value(user.teacherVerified),
         ),
       );
     } catch (e) {
@@ -201,7 +347,7 @@ class AuthViewModel extends ChangeNotifier {
     } else if (error.contains('User already registered')) {
       return 'An account with this email already exists';
     } else if (error.contains('Password should be at least')) {
-      return 'Password must be at least 6 characters';
+      return 'Password must be at least 8 characters';
     }
     return 'An error occurred. Please try again.';
   }
@@ -209,5 +355,36 @@ class AuthViewModel extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Sign in with Google. [role] is used only for brand-new accounts.
+  Future<bool> signInWithGoogle({required UserRole role}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final user = await _authService.signInWithGoogle(role: role);
+
+      if (user != null) {
+        _currentUser = user;
+        _currentRole = user.role;
+        _isAuthenticated = true;
+        await _cacheUserLocally(user);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        // User cancelled the Google picker
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Google Sign-In failed: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 }

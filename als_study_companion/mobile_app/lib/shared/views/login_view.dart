@@ -4,6 +4,10 @@ import 'package:shared_core/shared_core.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../../student/views/student_dashboard_view.dart';
 import '../../teacher/views/teacher_dashboard_view.dart';
+import 'student_registration_view.dart';
+import 'teacher_registration_view.dart';
+import 'email_verification_view.dart';
+import 'teacher_pending_approval_view.dart';
 
 /// Login view with Supabase Authentication.
 /// Routes to appropriate dashboard based on user role.
@@ -44,18 +48,81 @@ class _LoginViewState extends State<LoginView> {
     if (!mounted) return;
 
     if (success) {
-      // Navigate based on user role
       final role = authViewModel.currentRole;
       if (role == null) {
         _showError('Unable to determine user role');
         return;
       }
-
-      _navigateToDashboard(role);
+      _navigateAfterAuth(authViewModel);
     } else {
-      // Show error from view model
       _showError(authViewModel.errorMessage ?? 'Login failed');
     }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    // Ask the user whether they are a student or teacher before triggering
+    // Google sign-in so we can set the correct role on first sign-up.
+    final role = await _showRolePicker();
+    if (role == null || !mounted) return;
+
+    setState(() => _isLoading = true);
+
+    final authViewModel = context.read<AuthViewModel>();
+    final success = await authViewModel.signInWithGoogle(role: role);
+
+    setState(() => _isLoading = false);
+
+    if (!mounted) return;
+
+    if (success) {
+      final resolvedRole = authViewModel.currentRole;
+      if (resolvedRole == null) {
+        _showError('Unable to determine user role');
+        return;
+      }
+      _navigateAfterAuth(authViewModel);
+    } else {
+      final err = authViewModel.errorMessage;
+      // null means user cancelled — no error shown
+      if (err != null) _showError(err);
+    }
+  }
+
+  /// Shows a bottom sheet asking the user to pick their role.
+  Future<UserRole?> _showRolePicker() async {
+    return showModalBottomSheet<UserRole>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Sign in as…',
+              style: Theme.of(
+                ctx,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            _RoleButton(
+              icon: Icons.school_outlined,
+              label: 'Student',
+              onTap: () => Navigator.pop(ctx, UserRole.student),
+            ),
+            const SizedBox(height: 12),
+            _RoleButton(
+              icon: Icons.person_outlined,
+              label: 'Teacher',
+              onTap: () => Navigator.pop(ctx, UserRole.teacher),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showError(String message) {
@@ -84,6 +151,75 @@ class _LoginViewState extends State<LoginView> {
     Navigator.of(
       context,
     ).pushReplacement(MaterialPageRoute(builder: (_) => dashboard));
+  }
+
+  /// Decides whether to go to dashboard, email verification, or teacher approval.
+  void _navigateAfterAuth(AuthViewModel authVm) {
+    if (authVm.needsEmailVerification) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const EmailVerificationView()),
+      );
+      return;
+    }
+    if (authVm.needsTeacherApproval) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const TeacherPendingApprovalView()),
+      );
+      return;
+    }
+    _navigateToDashboard(authVm.currentRole!);
+  }
+
+  /// Shows a bottom sheet to pick Student or Teacher, then navigates
+  /// to the corresponding registration screen.
+  void _showRegisterRolePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Register as…',
+              style: Theme.of(
+                ctx,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            _RoleButton(
+              icon: Icons.school_outlined,
+              label: 'Student',
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const StudentRegistrationView(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _RoleButton(
+              icon: Icons.person_outlined,
+              label: 'Teacher',
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const TeacherRegistrationView(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -174,19 +310,43 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Divider
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(color: Colors.grey[500]),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Google Sign-In button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: _isLoading ? null : _handleGoogleSignIn,
+                      icon: Image.network(
+                        'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                        height: 20,
+                        width: 20,
+                        errorBuilder: (_, _, _) =>
+                            const Icon(Icons.g_mobiledata, size: 22),
+                      ),
+                      label: const Text('Continue with Google'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   // Register link
                   TextButton(
-                    onPressed: () {
-                      // TODO: Navigate to registration view
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Registration will be available soon. '
-                            'Please contact your administrator.',
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _showRegisterRolePicker(),
                     child: const Text('Don\'t have an account? Register'),
                   ),
                 ],
@@ -194,6 +354,35 @@ class _LoginViewState extends State<LoginView> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Private helper widget
+// ---------------------------------------------------------------------------
+
+class _RoleButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _RoleButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon),
+        label: Text(label, style: const TextStyle(fontSize: 16)),
       ),
     );
   }
