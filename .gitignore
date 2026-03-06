@@ -1,0 +1,23 @@
+node_modules/
+
+# IDE files
+**/.idea/
+**/*.iml
+
+# Dart and Flutter generated files
+**/.dart_tool/
+**/.flutter-plugins-dependencies
+**/.metadata
+**/build/
+**/coverage/
+**/doc/api/
+**/.packages
+**/pubspec.lock
+
+# Environment files
+**/.env
+**/.env.*
+
+# OS and logs
+**/.DS_Store
+**/*.log
