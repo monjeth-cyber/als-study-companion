@@ -3,6 +3,7 @@ import 'admin_dashboard_page.dart';
 import '../users/user_management_page.dart';
 import '../analytics/analytics_page.dart';
 import '../centers/center_management_page.dart';
+import 'content_management_page.dart';
 
 /// Admin web panel shell with sidebar navigation.
 class AdminShell extends StatefulWidget {
@@ -26,7 +27,7 @@ class _AdminShellState extends State<AdminShell> {
   final List<Widget> _pages = const [
     AdminDashboardPage(),
     UserManagementPage(),
-    _ContentPlaceholder(),
+    ContentManagementPage(),
     CenterManagementPage(),
     AnalyticsPage(),
   ];
@@ -83,24 +84,4 @@ class _NavItem {
   final IconData icon;
   final String label;
   const _NavItem({required this.icon, required this.label});
-}
-
-class _ContentPlaceholder extends StatelessWidget {
-  const _ContentPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.library_books, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Content Management', style: TextStyle(fontSize: 24)),
-          SizedBox(height: 8),
-          Text('Manage lessons, quizzes, and educational materials.'),
-        ],
-      ),
-    );
-  }
 }

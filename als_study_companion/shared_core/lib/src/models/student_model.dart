@@ -8,6 +8,8 @@ class StudentModel {
   final String gradeLevel;
   final DateTime enrollmentDate;
   final bool isActive;
+  final String? guardianName;
+  final String? guardianContact;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,6 +22,8 @@ class StudentModel {
     required this.gradeLevel,
     required this.enrollmentDate,
     this.isActive = true,
+    this.guardianName,
+    this.guardianContact,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -34,6 +38,8 @@ class StudentModel {
       'grade_level': gradeLevel,
       'enrollment_date': enrollmentDate.toIso8601String(),
       'is_active': isActive,
+      'guardian_name': guardianName,
+      'guardian_contact': guardianContact,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -41,19 +47,31 @@ class StudentModel {
 
   factory StudentModel.fromMap(Map<String, dynamic> map) {
     final rawIsActive = map['is_active'] ?? map['isActive'];
-    final isActiveVal = rawIsActive == 1 || rawIsActive == true || rawIsActive == '1';
+    final isActiveVal =
+        rawIsActive == 1 || rawIsActive == true || rawIsActive == '1';
 
     return StudentModel(
       id: map['id'] as String,
       userId: (map['user_id'] ?? map['userId']) as String,
       teacherId: (map['teacher_id'] ?? map['teacherId']) as String?,
       alsCenterId: (map['als_center_id'] ?? map['alsCenterId']) as String?,
-      learnerReferenceNumber: (map['learner_reference_number'] ?? map['learnerReferenceNumber']) as String,
+      learnerReferenceNumber:
+          (map['learner_reference_number'] ?? map['learnerReferenceNumber'])
+              as String,
       gradeLevel: (map['grade_level'] ?? map['gradeLevel']) as String,
-      enrollmentDate: DateTime.parse((map['enrollment_date'] ?? map['enrollmentDate']) as String),
+      enrollmentDate: DateTime.parse(
+        (map['enrollment_date'] ?? map['enrollmentDate']) as String,
+      ),
       isActive: isActiveVal,
-      createdAt: DateTime.parse((map['created_at'] ?? map['createdAt']) as String),
-      updatedAt: DateTime.parse((map['updated_at'] ?? map['updatedAt']) as String),
+      guardianName: (map['guardian_name'] ?? map['guardianName']) as String?,
+      guardianContact:
+          (map['guardian_contact'] ?? map['guardianContact']) as String?,
+      createdAt: DateTime.parse(
+        (map['created_at'] ?? map['createdAt']) as String,
+      ),
+      updatedAt: DateTime.parse(
+        (map['updated_at'] ?? map['updatedAt']) as String,
+      ),
     );
   }
 
@@ -66,6 +84,8 @@ class StudentModel {
     String? gradeLevel,
     DateTime? enrollmentDate,
     bool? isActive,
+    String? guardianName,
+    String? guardianContact,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -79,6 +99,8 @@ class StudentModel {
       gradeLevel: gradeLevel ?? this.gradeLevel,
       enrollmentDate: enrollmentDate ?? this.enrollmentDate,
       isActive: isActive ?? this.isActive,
+      guardianName: guardianName ?? this.guardianName,
+      guardianContact: guardianContact ?? this.guardianContact,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
