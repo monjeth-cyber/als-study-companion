@@ -2,7 +2,7 @@ import 'package:shared_core/shared_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/database/database_helper.dart';
 
-/// Repository for lesson data operations (SQLite & Firebase).
+/// Repository for lesson data operations (SQLite local cache & Supabase remote).
 class LessonRepository {
   final DatabaseHelper _db = DatabaseHelper.instance;
 
@@ -42,7 +42,7 @@ class LessonRepository {
     await _db.delete(DbConstants.tableLessons, id);
   }
 
-  // ─── Firebase Operations (TODO) ───
+  // ─── Supabase Remote Operations ───
 
   Future<List<LessonModel>> fetchRemoteLessons() async {
     try {
