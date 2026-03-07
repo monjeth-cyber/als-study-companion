@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_core/shared_core.dart';
 import '../../core/services/supabase_auth_service.dart';
+import '../../core/services/biometric_service.dart';
+import '../../core/services/secure_credential_storage.dart';
 import '../../core/local/local_database.dart';
 import 'package:drift/drift.dart' as drift;
 
@@ -10,13 +12,20 @@ import 'package:drift/drift.dart' as drift;
 class AuthViewModel extends ChangeNotifier {
   final SupabaseAuthService _authService;
   final LocalDatabase _localDb;
+  final BiometricService _biometricService;
+  final SecureCredentialStorage _credStorage;
 
   AuthViewModel({
     required SupabaseAuthService authService,
     required LocalDatabase localDb,
+    BiometricService? biometricService,
+    SecureCredentialStorage? credentialStorage,
   }) : _authService = authService,
-       _localDb = localDb {
+       _localDb = localDb,
+       _biometricService = biometricService ?? BiometricService(),
+       _credStorage = credentialStorage ?? SecureCredentialStorage() {
     _initAuthListener();
+    _initBiometricState();
   }
 
   UserModel? _currentUser;
@@ -26,12 +35,26 @@ class AuthViewModel extends ChangeNotifier {
   bool _isAuthenticated = false;
   bool _emailVerified = false;
 
+  // Biometric state
+  bool _isBiometricAvailable = false;
+  bool _isBiometricEnabled = false;
+  String _biometricLabel = 'Biometrics';
+
   UserModel? get currentUser => _currentUser;
   UserRole? get currentRole => _currentRole;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _isAuthenticated;
   bool get emailVerified => _emailVerified;
+
+  /// Whether the device supports biometric authentication.
+  bool get isBiometricAvailable => _isBiometricAvailable;
+
+  /// Whether biometric auto-fill is currently set up and enabled.
+  bool get isBiometricEnabled => _isBiometricEnabled;
+
+  /// Human-readable label for the available biometric type (e.g. "Face ID").
+  String get biometricLabel => _biometricLabel;
 
   /// True when the user is logged in but their email is not verified.
   bool get needsEmailVerification =>
@@ -44,10 +67,77 @@ class AuthViewModel extends ChangeNotifier {
       _currentUser!.role == UserRole.teacher &&
       !_currentUser!.teacherVerified;
 
+  // ---------------------------------------------------------------------------
+  // Biometric helpers
+  // ---------------------------------------------------------------------------
+
+  /// Loads device biometric availability and current enabled state.
+  /// Called once on construction so the login UI can show/hide the
+  /// auto-fill button immediately.
+  Future<void> _initBiometricState() async {
+    _isBiometricAvailable = await _biometricService.isAvailable();
+    _isBiometricEnabled =
+        _isBiometricAvailable && await _credStorage.isEnabled();
+    if (_isBiometricAvailable) {
+      _biometricLabel = await _biometricService.getBiometricLabel();
+    }
+    notifyListeners();
+  }
+
+  /// Prompts a biometric scan, then — on success — securely stores [email]
+  /// and [password] so they can be auto-filled later.
+  ///
+  /// Call this from the post-registration [BiometricSetupView] after the user
+  /// confirms they want to enable biometric login.
+  ///
+  /// Returns [true] when the scan succeeded and credentials were saved.
+  Future<bool> setupBiometric({
+    required String email,
+    required String password,
+  }) async {
+    final authenticated = await _biometricService.authenticate(
+      reason: 'Scan to enable $_biometricLabel login',
+    );
+    if (!authenticated) return false;
+
+    await _credStorage.saveCredentials(email: email, password: password);
+    _isBiometricEnabled = true;
+    notifyListeners();
+    return true;
+  }
+
+  /// Disables biometric auto-fill and removes the stored credentials.
+  Future<void> disableBiometric() async {
+    await _credStorage.clearCredentials();
+    _isBiometricEnabled = false;
+    notifyListeners();
+  }
+
+  /// Prompts the user for biometric authentication.
+  ///
+  /// On success, returns the saved credentials so the login form can be
+  /// auto-filled. Returns [null] if the scan fails, the user cancels, or
+  /// no credentials are stored.
+  Future<({String email, String password})?> biometricAutoFill() async {
+    if (!_isBiometricEnabled) return null;
+
+    final authenticated = await _biometricService.authenticate(
+      reason: 'Authenticate to auto-fill your credentials',
+    );
+    if (!authenticated) return null;
+
+    return await _credStorage.getCredentials();
+  }
+
+  /// Refreshes [isBiometricEnabled] — useful after the setup view completes.
+  Future<void> refreshBiometricState() async {
+    _isBiometricEnabled =
+        _isBiometricAvailable && await _credStorage.isEnabled();
+    notifyListeners();
+  }
+
   /// Initialize auth state listener
-  void _initAuthListener() {
-    _authService.authStateChanges.listen((authState) async {
-      if (authState.session != null) {
+  void _initAuthListener() {    _authService.authStateChanges.listen((authState) async {      if (authState.session != null) {
         await _loadCurrentUser();
       } else {
         _currentUser = null;

@@ -34,6 +34,10 @@ dependencies:
   # Network & Connectivity
   connectivity_plus: ^6.1.4
 
+  # Biometric Authentication
+  local_auth: ^2.3.0
+  flutter_secure_storage: ^9.2.2
+
   # Local Storage
   shared_preferences: ^2.5.3
 

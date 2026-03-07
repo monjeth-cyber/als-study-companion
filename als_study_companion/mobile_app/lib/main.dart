@@ -9,6 +9,8 @@ import 'core/services/connectivity_service.dart';
 import 'core/database/database_helper.dart';
 import 'core/local/local_database.dart';
 import 'core/services/supabase_auth_service.dart';
+import 'core/services/biometric_service.dart';
+import 'core/services/secure_credential_storage.dart';
 import 'shared/viewmodels/auth_viewmodel.dart';
 import 'shared/viewmodels/sync_viewmodel.dart';
 import 'student/viewmodels/lesson_viewmodel.dart';
@@ -71,12 +73,18 @@ class ALSStudyCompanionApp extends StatelessWidget {
           dispose: (_, db) => db.close(),
         ),
         Provider<SupabaseAuthService>(create: (_) => SupabaseAuthService()),
+        Provider<BiometricService>(create: (_) => BiometricService()),
+        Provider<SecureCredentialStorage>(
+          create: (_) => SecureCredentialStorage(),
+        ),
 
         // Shared ViewModels
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(
             authService: context.read<SupabaseAuthService>(),
             localDb: context.read<LocalDatabase>(),
+            biometricService: context.read<BiometricService>(),
+            credentialStorage: context.read<SecureCredentialStorage>(),
           ),
         ),
         ChangeNotifierProvider(create: (_) => SyncViewModel()),

@@ -5,6 +5,7 @@ import 'package:shared_core/shared_core.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../../student/views/student_dashboard_view.dart';
 import '../../teacher/views/teacher_dashboard_view.dart';
+import 'biometric_setup_view.dart';
 
 /// Waiting screen shown after registration — polls Firebase to check if
 /// the user has verified their email. Offers a resend button.
@@ -73,6 +74,17 @@ class _EmailVerificationViewState extends State<EmailVerificationView> {
   }
 
   void _navigateToDashboard(UserRole role) {
+    // If the device supports biometrics and the user has NOT yet enabled
+    // biometric login, offer the setup step before going to the dashboard.
+    final authVm = context.read<AuthViewModel>();
+    if (authVm.isBiometricAvailable && !authVm.isBiometricEnabled) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const BiometricSetupView()),
+        (_) => false,
+      );
+      return;
+    }
+
     Widget dashboard;
     switch (role) {
       case UserRole.student:

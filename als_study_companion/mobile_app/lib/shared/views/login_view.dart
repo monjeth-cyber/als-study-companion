@@ -24,6 +24,7 @@ class _LoginViewState extends State<LoginView> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _isBiometricAutoFilling = false;
 
   @override
   void dispose() {
@@ -123,6 +124,38 @@ class _LoginViewState extends State<LoginView> {
         ),
       ),
     );
+  }
+
+  /// Triggers a biometric scan.  On success, populates the email and
+  /// password fields — the user can then review and tap Sign In.
+  Future<void> _handleBiometricAutoFill() async {
+    if (_isBiometricAutoFilling) return;
+    setState(() => _isBiometricAutoFilling = true);
+
+    final authViewModel = context.read<AuthViewModel>();
+    final creds = await authViewModel.biometricAutoFill();
+
+    setState(() => _isBiometricAutoFilling = false);
+
+    if (!mounted) return;
+
+    if (creds != null) {
+      _emailController.text = creds.email;
+      _passwordController.text = creds.password;
+      // Trigger login automatically after successful biometric scan
+      _handleLogin();
+    } else {
+      // null means the user cancelled or biometric failed — show soft message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Biometric authentication was not completed.',
+          ),
+          backgroundColor: Colors.orange[700],
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _showError(String message) {
@@ -307,6 +340,49 @@ class _LoginViewState extends State<LoginView> {
                             )
                           : const Text('Sign In'),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // ── Biometric Auto-fill button ─────────────────────────────
+                  // Shown only when the user has previously set up biometric
+                  // login on this device.
+                  Consumer<AuthViewModel>(
+                    builder: (_, authVm, __) {
+                      if (!authVm.isBiometricEnabled) return const SizedBox.shrink();
+                      final label = authVm.biometricLabel;
+                      final icon =
+                          label == 'Face ID'
+                              ? Icons.face_outlined
+                              : Icons.fingerprint;
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed:
+                              (_isLoading || _isBiometricAutoFilling)
+                                  ? null
+                                  : _handleBiometricAutoFill,
+                          icon: _isBiometricAutoFilling
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Icon(icon),
+                          label: Text(
+                            _isBiometricAutoFilling
+                                ? 'Scanning…'
+                                : 'Auto-fill with $label',
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
 
