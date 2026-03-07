@@ -17,9 +17,7 @@ dependencies:
   # Supabase
   supabase_flutter: ^2.5.0
 
-  # Firebase
-  firebase_core: ^3.13.0
-  firebase_auth: ^5.5.2
+  # Google Sign-In (used for native OAuth flow → Supabase)
   google_sign_in: ^6.3.0
   
   # Environment Variables

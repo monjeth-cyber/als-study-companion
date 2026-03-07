@@ -148,9 +148,7 @@ class _LoginViewState extends State<LoginView> {
       // null means the user cancelled or biometric failed — show soft message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text(
-            'Biometric authentication was not completed.',
-          ),
+          content: const Text('Biometric authentication was not completed.'),
           backgroundColor: Colors.orange[700],
           duration: const Duration(seconds: 2),
         ),
@@ -348,20 +346,19 @@ class _LoginViewState extends State<LoginView> {
                   // login on this device.
                   Consumer<AuthViewModel>(
                     builder: (_, authVm, __) {
-                      if (!authVm.isBiometricEnabled) return const SizedBox.shrink();
+                      if (!authVm.isBiometricEnabled)
+                        return const SizedBox.shrink();
                       final label = authVm.biometricLabel;
-                      final icon =
-                          label == 'Face ID'
-                              ? Icons.face_outlined
-                              : Icons.fingerprint;
+                      final icon = label == 'Face ID'
+                          ? Icons.face_outlined
+                          : Icons.fingerprint;
                       return SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: OutlinedButton.icon(
-                          onPressed:
-                              (_isLoading || _isBiometricAutoFilling)
-                                  ? null
-                                  : _handleBiometricAutoFill,
+                          onPressed: (_isLoading || _isBiometricAutoFilling)
+                              ? null
+                              : _handleBiometricAutoFill,
                           icon: _isBiometricAutoFilling
                               ? const SizedBox(
                                   width: 18,
@@ -377,8 +374,9 @@ class _LoginViewState extends State<LoginView> {
                                 : 'Auto-fill with $label',
                           ),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                           ),
                         ),
                       );

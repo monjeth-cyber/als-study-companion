@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_core/shared_core.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// Service for Supabase Authentication operations.
@@ -39,8 +38,8 @@ class SupabaseAuthService {
 
   /// Register a new student account.
   ///
-  /// Creates a Firebase Auth account, sends email verification, then saves
-  /// the full student profile to the Supabase `users` table.
+  /// Creates a Supabase Auth account (which triggers a confirmation email),
+  /// then saves the full student profile to the Supabase `users` table.
   Future<UserModel> registerStudent({
     required String email,
     required String password,
@@ -55,25 +54,15 @@ class SupabaseAuthService {
     String? lastYearAttended,
     String? alsCenterId,
   }) async {
-    // 1. Create Firebase Auth account
-    final fbCred = await fb.FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
-    final fbUser = fbCred.user;
-    if (fbUser == null) throw Exception('Firebase account creation failed.');
+    // 1. Create Supabase Auth account (sends confirmation email automatically
+    //    when "Email Confirmations" is enabled in the Supabase dashboard).
+    final res = await _client.auth.signUp(email: email, password: password);
+    if (res.user == null) throw Exception('Supabase account creation failed.');
 
-    // Update display name in Firebase
-    await fbUser.updateDisplayName('$firstName $lastName');
-
-    // 2. Send email verification via Firebase
-    await fbUser.sendEmailVerification();
-
-    // 3. Sign into Supabase so we have a session (email + password)
-    await _client.auth.signUp(email: email, password: password);
-
-    // 4. Save full profile to Supabase `users` table
+    // 2. Save full profile to Supabase `users` table
     final now = DateTime.now();
     final userMap = {
-      'id': fbUser.uid,
+      'id': res.user!.id,
       'email': email,
       'full_name': '$firstName $lastName',
       'role': UserRole.student.name,
@@ -100,8 +89,8 @@ class SupabaseAuthService {
 
   /// Register a new teacher account.
   ///
-  /// Creates a Firebase Auth account, sends email verification, then saves
-  /// the teacher profile to the Supabase `users` table.
+  /// Creates a Supabase Auth account (which triggers a confirmation email),
+  /// then saves the teacher profile to the Supabase `users` table.
   Future<UserModel> registerTeacher({
     required String email,
     required String password,
@@ -110,24 +99,14 @@ class SupabaseAuthService {
     required String phoneNumber,
     String? alsCenterId,
   }) async {
-    // 1. Create Firebase Auth account
-    final fbCred = await fb.FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
-    final fbUser = fbCred.user;
-    if (fbUser == null) throw Exception('Firebase account creation failed.');
+    // 1. Create Supabase Auth account
+    final res = await _client.auth.signUp(email: email, password: password);
+    if (res.user == null) throw Exception('Supabase account creation failed.');
 
-    await fbUser.updateDisplayName('$firstName $lastName');
-
-    // 2. Send email verification
-    await fbUser.sendEmailVerification();
-
-    // 3. Sign into Supabase
-    await _client.auth.signUp(email: email, password: password);
-
-    // 4. Save profile to Supabase
+    // 2. Save profile to Supabase
     final now = DateTime.now();
     final userMap = {
-      'id': fbUser.uid,
+      'id': res.user!.id,
       'email': email,
       'full_name': '$firstName $lastName',
       'role': UserRole.teacher.name,
@@ -181,12 +160,13 @@ class SupabaseAuthService {
     }
   }
 
-  /// Check if Firebase email is verified (reloads user first).
-  Future<bool> checkFirebaseEmailVerified() async {
-    final fbUser = fb.FirebaseAuth.instance.currentUser;
-    if (fbUser == null) return false;
-    await fbUser.reload();
-    return fb.FirebaseAuth.instance.currentUser?.emailVerified ?? false;
+  /// Check if the current user's email is verified via Supabase.
+  Future<bool> checkEmailVerified() async {
+    // Refresh the session to get the latest email confirmation state.
+    try {
+      await _client.auth.refreshSession();
+    } catch (_) {}
+    return _client.auth.currentUser?.emailConfirmedAt != null;
   }
 
   /// Mark user email as verified in the Supabase users table.
@@ -222,17 +202,16 @@ class SupabaseAuthService {
         .eq('id', userId);
   }
 
-  /// Send Firebase email verification to current user.
-  Future<void> sendFirebaseEmailVerification() async {
-    final fbUser = fb.FirebaseAuth.instance.currentUser;
-    if (fbUser != null && !fbUser.emailVerified) {
-      await fbUser.sendEmailVerification();
+  /// Send Supabase email verification to current user.
+  Future<void> sendEmailVerification() async {
+    final user = currentUser;
+    if (user != null && user.email != null) {
+      await _client.auth.resend(type: OtpType.signup, email: user.email!);
     }
   }
 
-  /// Sign out from Firebase and Supabase.
+  /// Sign out from Supabase.
   Future<void> signOut() async {
-    await fb.FirebaseAuth.instance.signOut();
     await _client.auth.signOut();
   }
 
@@ -281,86 +260,85 @@ class SupabaseAuthService {
   /// Resend verification email.
   Future<void> resendVerificationEmail() async {
     final user = currentUser;
-    if (user != null) {
-      await _client.auth.resend(type: OtpType.signup, email: user.email);
+    if (user != null && user.email != null) {
+      await _client.auth.resend(type: OtpType.signup, email: user.email!);
     }
   }
 
   // ---------------------------------------------------------------------------
-  // Google Sign-In
+  // Google Sign-In (pure Supabase — no Firebase)
   // ---------------------------------------------------------------------------
 
-  /// Sign in with Google using Firebase Auth, then sync the user into Supabase.
+  // Web OAuth client ID configured on Google Cloud Console and in the
+  // Supabase Dashboard under Authentication → Providers → Google.
+  static const _googleWebClientId =
+      '941404387860-gmmjnep4i6c6coibbrd48lgv1c803mo2.apps.googleusercontent.com';
+
+  /// Sign in with Google using Supabase Auth.
+  ///
+  /// On mobile (Android/iOS) the native Google Sign-In flow fetches an ID
+  /// token which is exchanged with Supabase via [signInWithIdToken].
+  /// On web, Supabase handles the full OAuth redirect internally.
   ///
   /// [role] is required only for NEW users (first sign-in).
   /// Returns [UserModel] on success, throws on failure.
   Future<UserModel?> signInWithGoogle({required UserRole role}) async {
-    // Step 1 — Google account picker
-    final googleSignIn = kIsWeb
-        ? GoogleSignIn(
-            clientId:
-                '941404387860-o3bd12g934q2rt1segi6t976ch995grq.apps.googleusercontent.com',
-          )
-        : GoogleSignIn();
+    // ---- WEB ----------------------------------------------------------------
+    if (kIsWeb) {
+      await _client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'YOUR_WEB_REDIRECT_URL', // replace with your web app URL
+      );
+      // signInWithOAuth performs a browser redirect; the result comes back
+      // through the auth state stream. Return null here — the caller should
+      // listen to authStateChanges for the updated session.
+      return null;
+    }
+
+    // ---- MOBILE (Android / iOS) --------------------------------------------
+    // serverClientId tells the native SDK which web OAuth client to use so
+    // that an ID token (not just an access token) is returned.
+    final googleSignIn = GoogleSignIn(serverClientId: _googleWebClientId);
     final googleAccount = await googleSignIn.signIn();
     if (googleAccount == null) return null; // user cancelled
 
-    // Step 2 — Get Google credentials
     final googleAuth = await googleAccount.authentication;
     if (googleAuth.idToken == null) {
       throw Exception('Google Sign-In failed: no ID token returned.');
     }
 
-    // Step 3 — Sign into Firebase
-    final credential = fb.GoogleAuthProvider.credential(
-      idToken: googleAuth.idToken,
-      accessToken: googleAuth.accessToken,
-    );
-    final fbUserCredential = await fb.FirebaseAuth.instance
-        .signInWithCredential(credential);
-    final fbUser = fbUserCredential.user;
-    if (fbUser == null) throw Exception('Firebase sign-in returned null user.');
-
-    // Step 4 — Sign into Supabase with the Google ID token
+    // Exchange Google ID token for a Supabase session
     final signInRes = await _client.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: googleAuth.idToken!,
       accessToken: googleAuth.accessToken,
     );
 
-    // Validate sign-in response
     if (signInRes.user == null && _client.auth.currentUser == null) {
-      // Cleanup Google sign-in if something failed
       try {
         await googleSignIn.disconnect();
       } catch (_) {}
       throw Exception('Supabase sign-in failed: no user in response.');
     }
 
-    // Prefer the Supabase auth user id when looking up the users table.
     final supabaseUserId = signInRes.user?.id ?? _client.auth.currentUser?.id;
 
-    // Step 5 — Ensure user record exists in `users` table
-    // Try lookup by Supabase user id first, then by email as a fallback.
+    // Ensure a user record exists in the `users` table
     UserModel? existing;
     if (supabaseUserId != null) {
       existing = await _getUserFromDatabase(supabaseUserId);
     }
-    if (existing == null) {
-      final email = fbUser.email ?? googleAccount.email;
-      existing = await _getUserByEmail(email);
-    }
+    existing ??= await _getUserByEmail(googleAccount.email);
     if (existing != null) return existing;
 
-    // First sign-in — create user row. Use Supabase id when available so the
-    // users table aligns with the Supabase auth user id.
+    // First sign-in — create user row
     final now = DateTime.now();
     final userMap = {
-      'id': supabaseUserId ?? fbUser.uid,
-      'email': fbUser.email ?? googleAccount.email,
-      'full_name': fbUser.displayName ?? googleAccount.displayName ?? '',
+      'id': supabaseUserId,
+      'email': googleAccount.email,
+      'full_name': googleAccount.displayName ?? '',
       'role': role.name,
-      'profile_picture_url': fbUser.photoURL,
+      'profile_picture_url': googleAccount.photoUrl,
       'is_active': true,
       'email_verified': true,
       'teacher_verified': role == UserRole.teacher ? false : true,

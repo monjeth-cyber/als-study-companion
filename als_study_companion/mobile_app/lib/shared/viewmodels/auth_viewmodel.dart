@@ -137,7 +137,9 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   /// Initialize auth state listener
-  void _initAuthListener() {    _authService.authStateChanges.listen((authState) async {      if (authState.session != null) {
+  void _initAuthListener() {
+    _authService.authStateChanges.listen((authState) async {
+      if (authState.session != null) {
         await _loadCurrentUser();
       } else {
         _currentUser = null;
@@ -367,10 +369,10 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  /// Check if the current user's email is verified (Firebase).
+  /// Check if the current user's email is verified (Supabase).
   /// If verified, also marks the flag in the Supabase users table.
   Future<bool> checkEmailVerified() async {
-    final verified = await _authService.checkFirebaseEmailVerified();
+    final verified = await _authService.checkEmailVerified();
     _emailVerified = verified;
     if (verified && _currentUser != null && !_currentUser!.emailVerified) {
       await _authService.markEmailVerified(_currentUser!.id);
@@ -380,14 +382,14 @@ class AuthViewModel extends ChangeNotifier {
     return verified;
   }
 
-  /// Resend email verification link (Firebase).
+  /// Resend email verification link (Supabase).
   Future<void> sendEmailVerification() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await _authService.sendFirebaseEmailVerification();
+      await _authService.sendEmailVerification();
     } catch (e) {
       _errorMessage = 'Failed to send verification email: ${e.toString()}';
     }

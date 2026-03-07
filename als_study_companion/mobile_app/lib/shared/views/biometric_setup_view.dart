@@ -125,10 +125,9 @@ class _BiometricSetupViewState extends State<BiometricSetupView> {
     final email = authVm.currentUser?.email ?? '';
 
     // Choose icon based on biometric type
-    final biometricIcon =
-        biometricLabel == 'Face ID'
-            ? Icons.face_outlined
-            : Icons.fingerprint;
+    final biometricIcon = biometricLabel == 'Face ID'
+        ? Icons.face_outlined
+        : Icons.fingerprint;
 
     return Scaffold(
       body: SafeArea(
@@ -272,9 +271,9 @@ class _BiometricSetupViewState extends State<BiometricSetupView> {
                   'Your credentials are encrypted using your device\'s '
                   'secure storage (Keychain / EncryptedSharedPreferences) '
                   'and are never uploaded to any server.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[500],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -304,9 +303,7 @@ class _InfoCard extends StatelessWidget {
           context,
         ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         children: [
