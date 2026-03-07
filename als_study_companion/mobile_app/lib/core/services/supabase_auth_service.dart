@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_core/shared_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
@@ -295,10 +296,12 @@ class SupabaseAuthService {
   /// Returns [UserModel] on success, throws on failure.
   Future<UserModel?> signInWithGoogle({required UserRole role}) async {
     // Step 1 — Google account picker
-    final googleSignIn = GoogleSignIn(
-      clientId:
-          '941404387860-o3bd12g934q2rt1segi6t976ch995grq.apps.googleusercontent.com',
-    );
+    final googleSignIn = kIsWeb
+        ? GoogleSignIn(
+            clientId:
+                '941404387860-o3bd12g934q2rt1segi6t976ch995grq.apps.googleusercontent.com',
+          )
+        : GoogleSignIn();
     final googleAccount = await googleSignIn.signIn();
     if (googleAccount == null) return null; // user cancelled
 
@@ -319,20 +322,41 @@ class SupabaseAuthService {
     if (fbUser == null) throw Exception('Firebase sign-in returned null user.');
 
     // Step 4 — Sign into Supabase with the Google ID token
-    await _client.auth.signInWithIdToken(
+    final signInRes = await _client.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: googleAuth.idToken!,
       accessToken: googleAuth.accessToken,
     );
 
+    // Validate sign-in response
+    if (signInRes.user == null && _client.auth.currentUser == null) {
+      // Cleanup Google sign-in if something failed
+      try {
+        await googleSignIn.disconnect();
+      } catch (_) {}
+      throw Exception('Supabase sign-in failed: no user in response.');
+    }
+
+    // Prefer the Supabase auth user id when looking up the users table.
+    final supabaseUserId = signInRes.user?.id ?? _client.auth.currentUser?.id;
+
     // Step 5 — Ensure user record exists in `users` table
-    final existing = await _getUserFromDatabase(fbUser.uid);
+    // Try lookup by Supabase user id first, then by email as a fallback.
+    UserModel? existing;
+    if (supabaseUserId != null) {
+      existing = await _getUserFromDatabase(supabaseUserId);
+    }
+    if (existing == null) {
+      final email = fbUser.email ?? googleAccount.email;
+      existing = await _getUserByEmail(email);
+    }
     if (existing != null) return existing;
 
-    // First sign-in — create user row
+    // First sign-in — create user row. Use Supabase id when available so the
+    // users table aligns with the Supabase auth user id.
     final now = DateTime.now();
     final userMap = {
-      'id': fbUser.uid,
+      'id': supabaseUserId ?? fbUser.uid,
       'email': fbUser.email ?? googleAccount.email,
       'full_name': fbUser.displayName ?? googleAccount.displayName ?? '',
       'role': role.name,
@@ -345,5 +369,21 @@ class SupabaseAuthService {
     };
     await _client.from('users').upsert(userMap);
     return UserModel.fromMap(Map<String, dynamic>.from(userMap));
+  }
+
+  /// Lookup user by email in the `users` table.
+  Future<UserModel?> _getUserByEmail(String email) async {
+    try {
+      final response = await _client
+          .from('users')
+          .select()
+          .eq('email', email)
+          .maybeSingle();
+
+      if (response == null) return null;
+      return UserModel.fromMap(Map<String, dynamic>.from(response as Map));
+    } catch (e) {
+      return null;
+    }
   }
 }
