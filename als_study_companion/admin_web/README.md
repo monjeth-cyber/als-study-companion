@@ -1,3 +1,17 @@
+# Admin Web — ALS Study Companion
+
+This package contains the admin web app built with Flutter Web.
+
+Quick commands
+
+```bash
+cd als_study_companion/admin_web
+flutter pub get
+flutter test
+flutter run -d chrome
+```
+
+See the repository-level `docs/SETUP.md` for full developer environment instructions.
 # admin_web
 
 A new Flutter project.

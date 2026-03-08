@@ -64,8 +64,9 @@ class DownloadViewModel extends ChangeNotifier {
     required String videoUrl,
   }) async {
     // Check if already downloading
-    if (_progressMap.containsKey(lessonId) && _progressMap[lessonId]! > 0)
+    if (_progressMap.containsKey(lessonId) && _progressMap[lessonId]! > 0) {
       return;
+    }
 
     try {
       final now = DateTime.now();

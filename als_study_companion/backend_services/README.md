@@ -1,3 +1,16 @@
+# Backend Services — ALS Study Companion
+
+This package contains backend service wrappers for Supabase interactions and sync logic.
+
+Quick commands
+
+```bash
+cd als_study_companion/backend_services
+flutter pub get
+flutter test
+```
+
+See the repository-level `docs/SETUP.md` for environment and database migration notes.
 <!--
 This README describes the package. If you publish this package to pub.dev,
 this README's contents appear on the landing page for your package.

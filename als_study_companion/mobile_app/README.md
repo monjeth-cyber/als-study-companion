@@ -1,3 +1,17 @@
+# Mobile App — ALS Study Companion
+
+This package contains the Flutter mobile app for students and teachers.
+
+Quick commands
+
+```bash
+cd als_study_companion/mobile_app
+flutter pub get
+flutter test
+flutter run
+```
+
+See the repository-level `docs/SETUP.md` for full developer environment instructions.
 # mobile_app
 
 A new Flutter project.

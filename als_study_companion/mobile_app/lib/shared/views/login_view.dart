@@ -345,9 +345,10 @@ class _LoginViewState extends State<LoginView> {
                   // Shown only when the user has previously set up biometric
                   // login on this device.
                   Consumer<AuthViewModel>(
-                    builder: (_, authVm, __) {
-                      if (!authVm.isBiometricEnabled)
+                    builder: (context, authVm, child) {
+                      if (!authVm.isBiometricEnabled) {
                         return const SizedBox.shrink();
+                      }
                       final label = authVm.biometricLabel;
                       final icon = label == 'Face ID'
                           ? Icons.face_outlined

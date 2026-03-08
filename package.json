@@ -11,7 +11,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No JS tests defined; use Flutter tests in packages\"",
+    "supabase:migrate": "echo 'Run Supabase CLI migrations (local supabase CLI required)'",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",

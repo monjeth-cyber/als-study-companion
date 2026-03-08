@@ -70,8 +70,9 @@ class Validators {
   /// Validates a student ID number (alphanumeric, min 4 chars).
   static String? validateStudentIdNumber(String? value) {
     if (value == null || value.trim().isEmpty) return null; // Optional
-    if (value.trim().length < 4)
+    if (value.trim().length < 4) {
       return 'Student ID must be at least 4 characters';
+    }
     final idRegex = RegExp(r'^[A-Za-z0-9\-]+$');
     if (!idRegex.hasMatch(value.trim())) {
       return 'Student ID can only contain letters, numbers, and hyphens';
@@ -82,8 +83,9 @@ class Validators {
   /// Validates guardian name (at least 2 characters, optional).
   static String? validateGuardianName(String? value) {
     if (value == null || value.trim().isEmpty) return null; // Optional
-    if (value.trim().length < 2)
+    if (value.trim().length < 2) {
       return 'Guardian name must be at least 2 characters';
+    }
     return null;
   }
 

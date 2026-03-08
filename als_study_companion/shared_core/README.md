@@ -1,3 +1,14 @@
+# Shared Core — ALS Study Companion
+
+Common models, utilities, and shared code used by other packages.
+
+Quick commands
+
+```bash
+cd als_study_companion/shared_core
+flutter pub get
+flutter test
+```
 <!--
 This README describes the package. If you publish this package to pub.dev,
 this README's contents appear on the landing page for your package.
